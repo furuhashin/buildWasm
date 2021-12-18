@@ -93,3 +93,14 @@ export class ResultTypeNode {
     }
 }
 
+export class FunctionSectionNode extends SectionNode {
+    typeIdx: TypeIdx[] = []
+
+    load(buffer:Buffer) {
+        this.typeIdx = buffer.readVec<TypeIdx>(():TypeIdx => {
+            return buffer.readU32 as TypeIdx
+        })
+    }
+}
+
+type TypeIdx = number
