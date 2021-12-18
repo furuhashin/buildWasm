@@ -24,7 +24,7 @@ export class Buffer {
         return bytes[0] //Uint8Arrayの最初に255までの8桁のビットが入っている（Uint8arrayは８ビットごとに値を格納する）
     }
 
-    readU32(): number{
+     readU32(): number{
         let result = 0;
         let shift = 0;
         while (true) {

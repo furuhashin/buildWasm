@@ -1,5 +1,5 @@
-import {Buffer} from "./buffer.ts"
 
+import {Buffer} from "./buffer.ts"
 export class ModuleNode {
     magic?: Uint8Array
     version?: Uint8Array
@@ -43,3 +43,53 @@ abstract class SectionNode {
     }
     abstract load(buffer:Buffer):void
 }
+
+export class TypeSectionNode extends SectionNode {
+    funcTypes:FuncTypeNode[] = []
+
+    load(buffer:Buffer) {
+        this.funcTypes = buffer.readVec<FuncTypeNode>(():FuncTypeNode => {
+            const funcType = new FuncTypeNode()
+            funcType.load(buffer)
+            return funcType
+        })
+    }
+}
+
+export class FuncTypeNode {
+    static get TAG() {return 0x60}
+
+    paramType = new ResultTypeNode()
+    resultType = new ResultTypeNode()
+
+    load(buffer:Buffer) {
+        if (buffer.readByte() !== FuncTypeNode.TAG) {
+            throw new Error("invalid functype");
+        }
+        this.paramType = new ResultTypeNode()
+        this.paramType.load(buffer)
+        this.resultType = new ResultTypeNode()
+        this.resultType.load(buffer)
+    }
+}
+
+type I32 = 0x7f
+type I64 = 0x7e
+type F32 = 0x7d
+type F64 = 0x7c
+type NumType = I32 | I64 | F32 | F64
+type FuncRef = 0x70
+type ExternRef = 0x6f
+type RefType = FuncRef | ExternRef
+type ValType = NumType | RefType
+
+export class ResultTypeNode {
+    valTypes: ValType[] = []
+
+    load(buffer:Buffer) {
+        this.valTypes = buffer.readVec<ValType>(():ValType => {
+            return buffer.readByte() as ValType
+        })
+    }
+}
+
